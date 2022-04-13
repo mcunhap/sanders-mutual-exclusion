@@ -75,14 +75,5 @@ public class DelayTimer extends Timer {
 
     @Override
     public void fire() {
-        if (!SandersNode.isSending()) {
-            return;
-        }
-        if (this.sender.getNext() != null) {
-            this.getTargetNode().send(this.msg, this.sender.getNext());
-            SandersNode targetedNode = ((SandersNode) this.getTargetNode());
-            targetedNode.setMsgSentInThisRound(targetedNode.getMsgSentInThisRound() + 1);
-        }
-        this.startRelative(this.interval, this.getTargetNode()); // recursive restart of the timer
     }
 }

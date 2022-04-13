@@ -54,46 +54,15 @@ import sinalgo.tools.logging.Logging;
 
 import java.awt.*;
 
-/**
- * The Node of the sample project.
- */
 @Getter
 @Setter
 public class SandersNode extends Node {
 
-    /**
-     * the neighbor with the smallest ID
-     */
-    private SandersNode next;
-
-    /**
-     * number of messages sent by this node in the current round
-     */
-    private int msgSentInThisRound;
-
-    /**
-     * total number of messages sent by this node
-     */
-    private int msgSent;
-
-    /**
-     * The amount to increment the data of the message each time it goes throug a
-     * node.
-     */
-    private int increment;
 
     Logging log = Logging.getLogger("sanders_log");
 
-    // a flag to prevent all nodes from sending messages
-    @Getter
-    @Setter
-    private static boolean isSending = true;
-
     @Override
     public void handleMessages(Inbox inbox) {
-        if (!isSending()) { // don't even look at incoming messages
-            return;
-        }
         if (inbox.hasNext()) {
             Message msg = inbox.next();
         }
@@ -101,71 +70,31 @@ public class SandersNode extends Node {
 
     @Override
     public void preStep() {
-        this.msgSent += this.msgSentInThisRound;
-        this.msgSentInThisRound = 0;
+
     }
 
     @Override
     public void init() {
-        // initialize the node
-        try {
-            // Read a value from the configuration file config.xml.
-            // The following command reads an integer, which is expected to
-            // be stored in either of the two following styles in the XML file:
-            // <SandersNode>
-            // <increment value="2"/>
-            // </SandersNode>
-            // OR
-            // <SandersNode increment="2"/>
-
-            this.increment = Configuration.getIntegerParameter("sandersnode/increment");
-        } catch (CorruptConfigurationEntryException e) {
-            // Missing entry in the configuration file: Abort the simulation and
-            // display a message to the user
-            throw new SinalgoFatalException(e.getMessage());
-        }
     }
 
     @Override
     public void neighborhoodChange() {
-        this.setNext(null);
-        for (Edge e : this.getOutgoingConnections()) {
-            if (this.getNext() == null) {
-                this.setNext((SandersNode) e.getEndNode());
-            } else {
-                if (e.getEndNode().compareTo(this.getNext()) < 0) {
-                    this.setNext((SandersNode) e.getEndNode());
-                }
-            }
-        }
     }
 
     @Override
     public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
-        // set the color of this node
-        this.setColor(
-                new Color((float) 0.5 / (1 + this.msgSentInThisRound), (float) 0.5, (float) 1.0 / (1 + this.msgSentInThisRound)));
-        String text = Integer.toString(this.msgSent) + "|" + this.msgSentInThisRound;
-        // draw the node as a circle with the text inside
-        super.drawNodeAsDiskWithText(g, pt, highlight, text, 10, Color.YELLOW);
-        // super.drawNodeAsSquareWithText(g, pt, highlight, text, 10, Color.YELLOW);
     }
 
     @Override
     public void postStep() {
-
     }
 
     @Override
     public String toString() {
-        return "Messages sent so far: " + this.msgSent + "\nMessages sent in this round: " + this.msgSentInThisRound;
+        return "";
     }
 
     @Override
     public void checkRequirements() throws WrongConfigurationException {
-        if (this.increment < 0) {
-            throw new WrongConfigurationException(
-                    "SandersNode: The increment value (specified in the config file) must be greater or equal to 1.");
-        }
     }
 }
