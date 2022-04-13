@@ -77,7 +77,7 @@ import java.util.Enumeration;
 @Setter(AccessLevel.PRIVATE)
 public class CustomGlobal extends AbstractCustomGlobal {
 
-    private Logging log = Logging.getLogger("s1_log.txt");
+    private Logging log = Logging.getLogger("sanders_log.txt");
 
     // The user can optionally specify exitAfter in the config file to indicate
     // after how many rounds the simulation should stop.

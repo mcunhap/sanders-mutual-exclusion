@@ -53,7 +53,7 @@ public class DelayTimer extends Timer {
 
     private Message msg;
     private SandersNode sender;
-    private Logging log = Logging.getLogger("s1_log");
+    private Logging log = Logging.getLogger("sanders_log");
     private int interval;
 
     /**

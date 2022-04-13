@@ -82,7 +82,7 @@ public class SandersNode extends Node {
      */
     private int increment;
 
-    Logging log = Logging.getLogger("s1_log");
+    Logging log = Logging.getLogger("sanders_log");
 
     // a flag to prevent all nodes from sending messages
     @Getter
@@ -112,13 +112,13 @@ public class SandersNode extends Node {
             // Read a value from the configuration file config.xml.
             // The following command reads an integer, which is expected to
             // be stored in either of the two following styles in the XML file:
-            // <S1Node>
+            // <SandersNode>
             // <increment value="2"/>
-            // </S1Node>
+            // </SandersNode>
             // OR
-            // <S1Node increment="2"/>
+            // <SandersNode increment="2"/>
 
-            this.increment = Configuration.getIntegerParameter("s1node/increment");
+            this.increment = Configuration.getIntegerParameter("sandersnode/increment");
         } catch (CorruptConfigurationEntryException e) {
             // Missing entry in the configuration file: Abort the simulation and
             // display a message to the user
@@ -165,7 +165,7 @@ public class SandersNode extends Node {
     public void checkRequirements() throws WrongConfigurationException {
         if (this.increment < 0) {
             throw new WrongConfigurationException(
-                    "S1Node: The increment value (specified in the config file) must be greater or equal to 1.");
+                    "SandersNode: The increment value (specified in the config file) must be greater or equal to 1.");
         }
     }
 }
