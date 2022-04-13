@@ -46,21 +46,9 @@ import sinalgo.nodes.messages.Message;
 @AllArgsConstructor
 public class ReleaseMessage extends Message {
 
-    /**
-     * The payload of the ReleaseMessage.
-     */
-    private int data;
-
-    /**
-     * Increments the value of the data by one.
-     */
-    public final void incrementData() {
-        this.data++;
-    }
-
     @Override
     public Message clone() {
-        return new ReleaseMessage(this.data);
+        return new ReleaseMessage();
     }
 
 }

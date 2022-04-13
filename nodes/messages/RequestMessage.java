@@ -46,21 +46,9 @@ import sinalgo.nodes.messages.Message;
 @AllArgsConstructor
 public class RequestMessage extends Message {
 
-    /**
-     * The payload of the RequestMessage.
-     */
-    private int data;
-
-    /**
-     * Increments the value of the data by one.
-     */
-    public final void incrementData() {
-        this.data++;
-    }
-
     @Override
     public Message clone() {
-        return new RequestMessage(this.data);
+        return new RequestMessage();
     }
 
 }

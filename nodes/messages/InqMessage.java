@@ -46,21 +46,9 @@ import sinalgo.nodes.messages.Message;
 @AllArgsConstructor
 public class InqMessage extends Message {
 
-    /**
-     * The payload of the InqMessage.
-     */
-    private int data;
-
-    /**
-     * Increments the value of the data by one.
-     */
-    public final void incrementData() {
-        this.data++;
-    }
-
     @Override
     public Message clone() {
-        return new InqMessage(this.data);
+        return new InqMessage();
     }
 
 }

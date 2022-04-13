@@ -46,21 +46,9 @@ import sinalgo.nodes.messages.Message;
 @AllArgsConstructor
 public class YesMessage extends Message {
 
-    /**
-     * The payload of the YesMessage.
-     */
-    private int data;
-
-    /**
-     * Increments the value of the data by one.
-     */
-    public final void incrementData() {
-        this.data++;
-    }
-
     @Override
     public Message clone() {
-        return new YesMessage(this.data);
+        return new YesMessage();
     }
 
 }
