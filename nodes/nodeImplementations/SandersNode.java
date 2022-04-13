@@ -34,13 +34,12 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package projects.sample1.nodes.nodeImplementations;
+package projects.sanders.nodes.nodeImplementations;
 
 import lombok.Getter;
 import lombok.Setter;
 import projects.defaultProject.nodes.timers.MessageTimer;
-import projects.sample1.nodes.messages.Request;
-import projects.sample1.nodes.timers.DelayTimer;
+import projects.sanders.nodes.timers.DelayTimer;
 import sinalgo.configuration.Configuration;
 import sinalgo.exception.CorruptConfigurationEntryException;
 import sinalgo.exception.SinalgoFatalException;
@@ -60,12 +59,12 @@ import java.awt.*;
  */
 @Getter
 @Setter
-public class Sanders extends Node {
+public class SandersNode extends Node {
 
     /**
      * the neighbor with the smallest ID
      */
-    private S1Node next;
+    private SandersNode next;
 
     /**
      * number of messages sent by this node in the current round
@@ -97,14 +96,6 @@ public class Sanders extends Node {
         }
         if (inbox.hasNext()) {
             Message msg = inbox.next();
-            if (msg instanceof Request) {
-                Request m = (Request) msg;
-                if (this.getNext() != null) {
-                    m.incrementData();
-                    DelayTimer dt = new DelayTimer(m, this, m.getData());
-                    dt.startRelative(m.getData(), this);
-                }
-            }
         }
     }
 
@@ -140,41 +131,13 @@ public class Sanders extends Node {
         this.setNext(null);
         for (Edge e : this.getOutgoingConnections()) {
             if (this.getNext() == null) {
-                this.setNext((S1Node) e.getEndNode());
+                this.setNext((SandersNode) e.getEndNode());
             } else {
                 if (e.getEndNode().compareTo(this.getNext()) < 0) {
-                    this.setNext((S1Node) e.getEndNode());
+                    this.setNext((SandersNode) e.getEndNode());
                 }
             }
         }
-    }
-
-    /*
-     * Methods with the annotation NodePopupMethod can be executed by the user from
-     * the GUI by clicking on the node and selecting the menu point in the popup
-     * menu.
-     */
-
-    /**
-     * Initiate a message to be sent by this node in the next round. This starts the
-     * process of resending the message infinitely.
-     * <p>
-     * This method is part of the user-implemenation of this sample project.
-     */
-    @NodePopupMethod(menuText = "Start")
-    public void start() {
-        // This sample project is designed for the round-based simulator.
-        // I.e. a node is only allowed to send a message when it is its turn.
-        // To comply with this rule, we're not allowed to call the
-        // method 'SendMessage()' here, but need either to remember that the
-        // user has clicked to send a message and then send it in the intervalStep()
-        // manually. Here, we show a simpler and more elegant approach:
-        // Set a timer (with time 1), which will fire the next time this node is
-        // handled. The defaultProject already contains a MessageTimer which can
-        // be used for exactly this purpose.
-        MessageTimer msgTimer = new MessageTimer(new Request(1)); // broadcast
-        msgTimer.startRelative(1, this);
-        Tools.appendToOutput("Start Routing from node " + this.getID() + "\n");
     }
 
     @Override

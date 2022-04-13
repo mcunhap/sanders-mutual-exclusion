@@ -39,7 +39,7 @@ package projects.sanders;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import projects.sample1.nodes.nodeImplementations.S1Node;
+import projects.sanders.nodes.nodeImplementations.SandersNode;
 import sinalgo.configuration.Configuration;
 import sinalgo.exception.CorruptConfigurationEntryException;
 import sinalgo.exception.SinalgoFatalException;
@@ -131,86 +131,10 @@ public class CustomGlobal extends AbstractCustomGlobal {
 
     @Override
     public void preRun() {
-        // start the communication automatically if the AutoStart flag is set.
-        try {
-            if (Configuration.hasParameter("AutoStart") && Configuration.getBooleanParameter("AutoStart")) {
-                S1Node n = (S1Node) Tools.getNodeList().getRandomNode();
-                n.start(); // start from a random node
-            }
-        } catch (CorruptConfigurationEntryException e) {
-            throw new SinalgoFatalException("The 'AutoStart' option in the configuration file specifies whether a node"
-                    + "should be automatically selected to start the communication process. This flag needs to be"
-                    + "of type boolean (true|false).");
-        }
     }
 
     @Override
     public void postRound() {
-        double dt = System.currentTimeMillis() - Global.getStartTimeOfRound().getTime();
-        this.getLog().logln("Round " + (int) (Global.getCurrentTime()) + " time: " + dt + " Msg/Round: "
-                + Global.getNumberOfMessagesInThisRound());
-    }
-
-    /**
-     * Custom button to generate a infomation Dialog to show the node with the
-     * maximum sent messages.
-     */
-    @CustomButton(buttonText = "OKButton", imageName = "OK.gif", toolTipText = "Prints out the maximum sent messages of all nodes.")
-    public void printMaxMsgSent() {
-        S1Node max = null;
-        Enumeration<?> nodeEnumer = Tools.getNodeList().getNodeEnumeration();
-        while (nodeEnumer.hasMoreElements()) {
-            S1Node s1Node = (S1Node) nodeEnumer.nextElement();
-            if (max == null) {
-                max = s1Node;
-            } else {
-                if (max.getMsgSent() < s1Node.getMsgSent()) {
-                    max = s1Node;
-                }
-            }
-        }
-        if (Global.isGuiMode()) {
-            if (max != null) {
-                JOptionPane.showMessageDialog(((GUIRuntime) Main.getRuntime()).getGUI(),
-                        "The node with the maximum sent number of messages is the node with ID " + max.getID()
-                                + ". \nIt sent " + max.getMsgSent() + " messages until now.");
-            } else {
-                JOptionPane.showMessageDialog(((GUIRuntime) Main.getRuntime()).getGUI(), "There is no node.");
-            }
-        }
-    }
-
-    /*
-     * The method stopSending can be called through the 'Global' menu of Sinalgo.
-     * The menu-item is placed in a sub-menu 'Node Control', order='2' guarantees
-     * that it is placed after the 'Echo' menu. Note the use of the method
-     * includeGlobalMethodInMenu which lets you specify at each time the menu pops
-     * up, what menu-text should be displayed (or no menu at all, if the method
-     * returns null.)
-     */
-
-    @GlobalMethod(menuText = "...", subMenu = "Node Control", order = 2)
-    public void stopSending() {
-        S1Node.setSending(!S1Node.isSending());
-    }
-
-    @Override
-    public String includeGlobalMethodInMenu(Method m, String defaultText) {
-        if (m.getName().equals("stopSending")) {
-            if (Tools.getNodeList().size() == 0) {
-                return null; // don't display this menu option
-            }
-            return S1Node.isSending() ? "Stop Sending" : "Continue Sending";
-        }
-        return defaultText;
-    }
-
-    @Override
-    public void checkProjectRequirements() {
-        if (Global.isAsynchronousMode()) {
-            throw new SinalgoFatalException(
-                    "SampleProject1 is written to be executed in synchronous mode. It doesn't work in asynchronous mode.");
-        }
     }
 
     @Override

@@ -34,9 +34,9 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package projects.sample1.nodes.timers;
+package projects.sanders.nodes.timers;
 
-import projects.sample1.nodes.nodeImplementations.S1Node;
+import projects.sanders.nodes.nodeImplementations.SandersNode;
 import sinalgo.nodes.messages.Message;
 import sinalgo.nodes.timers.Timer;
 import sinalgo.tools.logging.Logging;
@@ -52,7 +52,7 @@ import sinalgo.tools.logging.Logging;
 public class DelayTimer extends Timer {
 
     private Message msg;
-    private S1Node sender;
+    private SandersNode sender;
     private Logging log = Logging.getLogger("s1_log");
     private int interval;
 
@@ -67,7 +67,7 @@ public class DelayTimer extends Timer {
      * @param sender   The sender of the message.
      * @param interval Interval between subsequent firings of the timer.
      */
-    public DelayTimer(Message msg, S1Node sender, int interval) {
+    public DelayTimer(Message msg, SandersNode sender, int interval) {
         this.msg = msg;
         this.sender = sender;
         this.interval = interval;
@@ -75,12 +75,12 @@ public class DelayTimer extends Timer {
 
     @Override
     public void fire() {
-        if (!S1Node.isSending()) {
+        if (!SandersNode.isSending()) {
             return;
         }
         if (this.sender.getNext() != null) {
             this.getTargetNode().send(this.msg, this.sender.getNext());
-            S1Node targetedNode = ((S1Node) this.getTargetNode());
+            SandersNode targetedNode = ((SandersNode) this.getTargetNode());
             targetedNode.setMsgSentInThisRound(targetedNode.getMsgSentInThisRound() + 1);
         }
         this.startRelative(this.interval, this.getTargetNode()); // recursive restart of the timer
