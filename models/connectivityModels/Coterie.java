@@ -3,6 +3,7 @@ package projects.sanders.models.connectivityModels;
 import sinalgo.exception.CorruptConfigurationEntryException;
 import sinalgo.models.ConnectivityModelHelper;
 import sinalgo.nodes.Node;
+import sinalgo.runtime.SinalgoRuntime;
 
 import java.util.HashMap;
 
@@ -34,7 +35,7 @@ public class Coterie extends ConnectivityModelHelper {
 
     private HashMap<String,Integer> nodePosition (Node n) {
         HashMap<String,Integer> position = new HashMap<String,Integer>();
-        int nodes_quantity = 4;
+        int nodes_quantity = SinalgoRuntime.getNodes().size();
         int matrix_size = (int) Math.sqrt(nodes_quantity);
         int row = (int) ((n.getID() - 1) % matrix_size);
         int column = (int) ((n.getID() - 1) / matrix_size);
