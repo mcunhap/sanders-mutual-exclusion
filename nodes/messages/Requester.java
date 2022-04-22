@@ -34,81 +34,21 @@ CAUSED AND ON ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY,
 OR TORT (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
 OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
-package projects.sanders.nodes.nodeImplementations;
+package projects.sanders.nodes.messages;
 
 import lombok.Getter;
 import lombok.Setter;
-import projects.defaultProject.nodes.timers.MessageTimer;
-import projects.sanders.nodes.messages.RequestMessage;
-import projects.sanders.nodes.messages.Requester;
-import projects.sanders.nodes.messages.RequesterComparator;
-import projects.sanders.nodes.timers.DelayTimer;
-import sinalgo.configuration.Configuration;
-import sinalgo.exception.CorruptConfigurationEntryException;
-import sinalgo.exception.SinalgoFatalException;
-import sinalgo.exception.WrongConfigurationException;
-import sinalgo.gui.transformation.PositionTransformation;
 import sinalgo.nodes.Node;
-import sinalgo.nodes.edges.Edge;
-import sinalgo.nodes.messages.Inbox;
 import sinalgo.nodes.messages.Message;
-import sinalgo.tools.Tools;
-import sinalgo.tools.logging.Logging;
-
-import java.awt.*;
-import java.util.PriorityQueue;
 
 @Getter
 @Setter
-public class SandersNode extends Node {
+public class Requester {
+    public Node node;
+    public int timestamp;
 
-    boolean inCs;
-    int currTs;
-    int myTs;
-    int yesVotes;
-    boolean hasVoted;
-    Node candidate;
-    int candidateTs;
-    boolean inquired;
-    PriorityQueue<Requester> deferredQ;
-
-    Logging log = Logging.getLogger("sanders_log");
-
-    @Override
-    public void handleMessages(Inbox inbox) {
-        if (inbox.hasNext()) {
-            Message msg = inbox.next();
-        }
-    }
-
-    @Override
-    public void preStep() {
-
-    }
-
-    @Override
-    public void init() {
-        deferredQ = new PriorityQueue<Requester>(5, new RequesterComparator());
-    }
-
-    @Override
-    public void neighborhoodChange() {
-    }
-
-    @Override
-    public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
-    }
-
-    @Override
-    public void postStep() {
-    }
-
-    @Override
-    public String toString() {
-        return "";
-    }
-
-    @Override
-    public void checkRequirements() throws WrongConfigurationException {
+    public Requester(Node req, int ts) {
+        node = req;
+        timestamp= ts;
     }
 }
