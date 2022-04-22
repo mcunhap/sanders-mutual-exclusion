@@ -36,19 +36,22 @@ OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 */
 package projects.sanders.nodes.messages;
 
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 import sinalgo.nodes.messages.Message;
 
 @Getter
 @Setter
-@AllArgsConstructor
 public class RequestMessage extends Message {
+    public int timestamp;
+
+    public RequestMessage(int ts) {
+        timestamp= ts;
+    }
 
     @Override
     public Message clone() {
-        return new RequestMessage();
+        return new RequestMessage(this.timestamp);
     }
 
 }
