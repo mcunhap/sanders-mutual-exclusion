@@ -1,0 +1,4 @@
+- Understand how Sinalgo works, and how I will implement Sanders algorithm. (http://www-di.inf.puc-rio.br/~endler/courses/DA/Sinalgo/SinalgoTutorial.pdf)
+- Implement one class for each possible message
+- Implement deferred queue logic with PriorityQueue class from java, using a custom comparator for maintain priority
+- Implement custom ConnectivityModel to group nodes by coteries
