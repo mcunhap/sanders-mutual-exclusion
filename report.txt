@@ -5,3 +5,5 @@
 - Add configuration file
 - Add enter/exit critical session logic
 - Add methods to handle all message types
+- Add timer to fire when node leave critical session
+- Add enter critical session logic to preStep phase
