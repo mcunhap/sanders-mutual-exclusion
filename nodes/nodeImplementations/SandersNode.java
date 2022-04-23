@@ -88,7 +88,9 @@ public class SandersNode extends Node {
 
     @Override
     public void preStep() {
-
+        if (!inCs) {
+            enterCS();
+        }
     }
 
     @Override
@@ -119,7 +121,6 @@ public class SandersNode extends Node {
     public void checkRequirements() throws WrongConfigurationException {
     }
 
-    // TODO: add enterCS method call logic somewhere
     private void enterCS() {
         myTs = currTs;
 
