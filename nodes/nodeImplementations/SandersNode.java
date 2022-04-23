@@ -73,7 +73,7 @@ public class SandersNode extends Node {
 
     @Override
     public void handleMessages(Inbox inbox) {
-        if (inbox.hasNext()) {
+        while (inbox.hasNext()) {
             Message msg = inbox.next();
             Node sender = inbox.getSender();
 
