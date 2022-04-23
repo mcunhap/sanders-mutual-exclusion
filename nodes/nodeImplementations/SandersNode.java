@@ -39,9 +39,7 @@ package projects.sanders.nodes.nodeImplementations;
 import lombok.Getter;
 import lombok.Setter;
 import projects.defaultProject.nodes.timers.MessageTimer;
-import projects.sanders.nodes.messages.RequestMessage;
-import projects.sanders.nodes.messages.Requester;
-import projects.sanders.nodes.messages.RequesterComparator;
+import projects.sanders.nodes.messages.*;
 import projects.sanders.nodes.timers.DelayTimer;
 import sinalgo.configuration.Configuration;
 import sinalgo.exception.CorruptConfigurationEntryException;
@@ -61,9 +59,8 @@ import java.util.PriorityQueue;
 @Getter
 @Setter
 public class SandersNode extends Node {
-
-    boolean inCs;
-    int currTs;
+    boolean inCs = false;
+    int currTs = 0;
     int myTs;
     int yesVotes;
     boolean hasVoted;
@@ -78,6 +75,13 @@ public class SandersNode extends Node {
     public void handleMessages(Inbox inbox) {
         if (inbox.hasNext()) {
             Message msg = inbox.next();
+            Node sender = inbox.getSender();
+
+            if (msg instanceof YesMessage) {
+                handleYes();
+            } else if (msg instanceof InqMessage) {
+                handleInq(sender, (InqMessage) msg);
+            }
         }
     }
 
@@ -97,10 +101,12 @@ public class SandersNode extends Node {
 
     @Override
     public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
+        super.draw(g, pt, highlight);
     }
 
     @Override
     public void postStep() {
+        currTs++;
     }
 
     @Override
@@ -110,5 +116,28 @@ public class SandersNode extends Node {
 
     @Override
     public void checkRequirements() throws WrongConfigurationException {
+    }
+
+    private void enterCS() {
+        myTs = currTs;
+
+        broadcast(new RequestMessage(myTs));
+    }
+
+    private void handleYes() {
+        // safe to get coterie size this way?
+        int neighboursSize = this.getOutgoingConnections().size();
+        yesVotes++;
+
+        if (yesVotes == neighboursSize) {
+            inCs = true;
+        }
+    }
+
+    private void handleInq(Node sender, InqMessage msg) {
+        if (myTs == msg.timestamp) {
+            send(new RelinquishMessage(), sender);
+            yesVotes--;
+        }
     }
 }
