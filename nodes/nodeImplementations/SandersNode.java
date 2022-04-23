@@ -60,13 +60,13 @@ import java.util.PriorityQueue;
 @Setter
 public class SandersNode extends Node {
     boolean inCs = false;
+    boolean hasVoted = false;
+    boolean inquired = false;
     int currTs = 0;
+    int yesVotes = 0;
     int myTs;
-    int yesVotes;
-    boolean hasVoted;
-    Node candidate;
     int candidateTs;
-    boolean inquired;
+    Node candidate;
     PriorityQueue<Requester> deferredQ;
 
     Logging log = Logging.getLogger("sanders_log");
@@ -81,9 +81,12 @@ public class SandersNode extends Node {
                 handleYes();
             } else if (msg instanceof InqMessage) {
                 handleInq(sender, (InqMessage) msg);
+            } else if (msg instanceof RequestMessage) {
+                handleRequest(sender, (RequestMessage) msg);
             }
         }
     }
+
 
     @Override
     public void preStep() {
@@ -137,6 +140,7 @@ public class SandersNode extends Node {
         int neighboursSize = this.getOutgoingConnections().size();
         yesVotes++;
 
+        // enter to CS if every neighbour vote yes
         if (yesVotes == neighboursSize) {
             inCs = true;
         }
@@ -146,6 +150,28 @@ public class SandersNode extends Node {
         if (myTs == msg.timestamp) {
             send(new RelinquishMessage(), sender);
             yesVotes--;
+        }
+    }
+
+
+    private void handleRequest(Node sender, RequestMessage msg) {
+        int senderTs = msg.timestamp;
+
+        if (!hasVoted) {
+            // send vote to sender
+            send(new YesMessage(), sender);
+            candidate = sender;
+            candidateTs = senderTs;
+            hasVoted = true;
+        } else {
+            // add sender to deferred queue
+            deferredQ.add(new Requester(sender, senderTs));
+
+            if ((senderTs < candidateTs) && !inquired) {
+                // request vote annulment
+                send(new InqMessage(candidateTs), candidate);
+                inquired = true;
+            }
         }
     }
 }
