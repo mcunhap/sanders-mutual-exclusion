@@ -2,3 +2,6 @@
 - Implement one class for each possible message
 - Implement deferred queue logic with PriorityQueue class from java, using a custom comparator for maintain priority
 - Implement custom ConnectivityModel to group nodes by coteries
+- Add configuration file
+- Add enter/exit critical session logic
+- Add methods to handle all message types
