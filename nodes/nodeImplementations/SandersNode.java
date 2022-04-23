@@ -83,10 +83,11 @@ public class SandersNode extends Node {
                 handleInq(sender, (InqMessage) msg);
             } else if (msg instanceof RequestMessage) {
                 handleRequest(sender, (RequestMessage) msg);
+            } else if (msg instanceof RelinquishMessage) {
+                handleRelinquish();
             }
         }
     }
-
 
     @Override
     public void preStep() {
@@ -173,5 +174,17 @@ public class SandersNode extends Node {
                 inquired = true;
             }
         }
+    }
+
+    private void handleRelinquish() {
+        // add candidate to deferred queue
+        deferredQ.add(new Requester(candidate, candidateTs));
+
+        // get first requester from deferred queue and use as candidate
+        Requester requester = deferredQ.poll();
+        send(new YesMessage(), requester.node);
+        candidate = requester.node;
+        candidateTs = requester.timestamp;
+        inquired = false;
     }
 }
