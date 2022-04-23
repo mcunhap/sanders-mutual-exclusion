@@ -38,19 +38,13 @@ package projects.sanders.nodes.nodeImplementations;
 
 import lombok.Getter;
 import lombok.Setter;
-import projects.defaultProject.nodes.timers.MessageTimer;
 import projects.sanders.nodes.messages.*;
-import projects.sanders.nodes.timers.DelayTimer;
-import sinalgo.configuration.Configuration;
-import sinalgo.exception.CorruptConfigurationEntryException;
-import sinalgo.exception.SinalgoFatalException;
+import projects.sanders.nodes.timers.CriticalSessionTimer;
 import sinalgo.exception.WrongConfigurationException;
 import sinalgo.gui.transformation.PositionTransformation;
 import sinalgo.nodes.Node;
-import sinalgo.nodes.edges.Edge;
 import sinalgo.nodes.messages.Inbox;
 import sinalgo.nodes.messages.Message;
-import sinalgo.tools.Tools;
 import sinalgo.tools.logging.Logging;
 
 import java.awt.*;
@@ -59,6 +53,7 @@ import java.util.PriorityQueue;
 @Getter
 @Setter
 public class SandersNode extends Node {
+    public static final double CRITICAL_SESSION_TIME = 5.0;
     boolean inCs = false;
     boolean hasVoted = false;
     boolean inquired = false;
@@ -131,8 +126,7 @@ public class SandersNode extends Node {
         broadcast(new RequestMessage(myTs));
     }
 
-    // TODO: add exitCS method call logic somewhere
-    private void exitCS() {
+    public void exitCS() {
         inCs = false;
 
         broadcast(new RelinquishMessage());
@@ -146,6 +140,10 @@ public class SandersNode extends Node {
         // enter to CS if every neighbour vote yes
         if (yesVotes == neighboursSize) {
             inCs = true;
+
+            // trigger timer to leave critical session
+            CriticalSessionTimer timer = new CriticalSessionTimer(this);
+            timer.startRelative(CRITICAL_SESSION_TIME, this);
         }
     }
 

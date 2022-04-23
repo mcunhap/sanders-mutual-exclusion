@@ -39,41 +39,16 @@ package projects.sanders.nodes.timers;
 import projects.sanders.nodes.nodeImplementations.SandersNode;
 import sinalgo.nodes.messages.Message;
 import sinalgo.nodes.timers.Timer;
-import sinalgo.tools.logging.Logging;
 
-/**
- * A timer that sends a message repeatedly with some delay. The method stops
- * sending the message when the connection to the receiver is broken up.
- * <p>
- * Note that the timer object knows the node which has started this timer.
- * However, this information is only set while the timer is started and
- * therefore may only be accessed in the <code>fire</code> method.
- */
-public class DelayTimer extends Timer {
+public class CriticalSessionTimer extends Timer {
+    private SandersNode node;
 
-    private Message msg;
-    private SandersNode sender;
-    private Logging log = Logging.getLogger("sanders_log");
-    private int interval;
-
-    /**
-     * Creates a new Timer object which will send the message repeatedly to the
-     * receiver. The delay between the successive firings of the timer is indicated
-     * by interval. The timer needs to be started initially, with an arbitrary
-     * delay, after which the first message is sent. All subsequent messages are
-     * sent with the given interval.
-     *
-     * @param msg      Message to be sent.
-     * @param sender   The sender of the message.
-     * @param interval Interval between subsequent firings of the timer.
-     */
-    public DelayTimer(Message msg, SandersNode sender, int interval) {
-        this.msg = msg;
-        this.sender = sender;
-        this.interval = interval;
+    public CriticalSessionTimer(SandersNode n) {
+        this.node = n;
     }
 
     @Override
     public void fire() {
+        this.node.exitCS();
     }
 }
