@@ -118,10 +118,18 @@ public class SandersNode extends Node {
     public void checkRequirements() throws WrongConfigurationException {
     }
 
+    // TODO: add enterCS method call logic somewhere
     private void enterCS() {
         myTs = currTs;
 
         broadcast(new RequestMessage(myTs));
+    }
+
+    // TODO: add exitCS method call logic somewhere
+    private void exitCS() {
+        inCs = false;
+
+        broadcast(new RelinquishMessage());
     }
 
     private void handleYes() {
