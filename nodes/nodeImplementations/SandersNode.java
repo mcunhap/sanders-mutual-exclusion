@@ -85,6 +85,8 @@ public class SandersNode extends Node {
                 handleRequest(sender, (RequestMessage) msg);
             } else if (msg instanceof RelinquishMessage) {
                 handleRelinquish();
+            } else if (msg instanceof ReleaseMessage) {
+                handleRelease();
             }
         }
     }
@@ -185,6 +187,20 @@ public class SandersNode extends Node {
         send(new YesMessage(), requester.node);
         candidate = requester.node;
         candidateTs = requester.timestamp;
+        inquired = false;
+    }
+
+    private void handleRelease() {
+        if (!deferredQ.isEmpty()) {
+            // get first requester from deferred queue and use as candidate
+            Requester nextRequester = deferredQ.poll();
+            send(new YesMessage(), nextRequester.node);
+            candidate = nextRequester.node;
+            candidateTs = nextRequester.timestamp;
+        } else {
+            hasVoted = false;
+        }
+
         inquired = false;
     }
 }
