@@ -49,6 +49,7 @@ import sinalgo.tools.logging.Logging;
 
 import java.awt.*;
 import java.util.PriorityQueue;
+import java.util.Random;
 
 @Getter
 @Setter
@@ -91,9 +92,15 @@ public class SandersNode extends Node {
         }
     }
 
+    private boolean tryEnterCS() {
+        Random random = new Random();
+
+        return random.ints(1, 5).findFirst().getAsInt() == 1;
+    }
+
     @Override
     public void preStep() {
-        if (!inCs) {
+        if (!inCs && tryEnterCS()) {
             enterCS();
         }
     }
