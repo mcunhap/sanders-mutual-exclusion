@@ -64,7 +64,7 @@ public class SandersNode extends Node {
     Node candidate;
     PriorityQueue<Requester> deferredQ;
 
-    Logging log = Logging.getLogger("sanders_log");
+    Logging myLog = Logging.getLogger("logfile.txt");
 
     @Override
     public void handleMessages(Inbox inbox) {
@@ -73,14 +73,19 @@ public class SandersNode extends Node {
             Node sender = inbox.getSender();
 
             if (msg instanceof YesMessage) {
+                System.out.println("Node " + this.getID() + " received yes message from node " + sender.getID());
                 handleYes();
             } else if (msg instanceof InqMessage) {
+                System.out.println("Node " + this.getID() + " received inq message from node " + sender.getID());
                 handleInq(sender, (InqMessage) msg);
             } else if (msg instanceof RequestMessage) {
+                System.out.println("Node " + this.getID() + " received request message from node " + sender.getID());
                 handleRequest(sender, (RequestMessage) msg);
             } else if (msg instanceof RelinquishMessage) {
+                System.out.println("Node " + this.getID() + " received relinquish message from node " + sender.getID());
                 handleRelinquish();
             } else if (msg instanceof ReleaseMessage) {
+                System.out.println("Node " + this.getID() + " received release message from node " + sender.getID());
                 handleRelease();
             }
         }
@@ -114,7 +119,8 @@ public class SandersNode extends Node {
 
     @Override
     public String toString() {
-        return "";
+        String text = "My timestamp: " + this.myTs + " yesVotes: " + this.yesVotes;
+        return text;
     }
 
     @Override
@@ -122,6 +128,7 @@ public class SandersNode extends Node {
     }
 
     private void enterCS() {
+        System.out.println("Node " + this.getID() + " trying to enter in CS");
         myTs = currTs;
 
         broadcast(new RequestMessage(myTs));
