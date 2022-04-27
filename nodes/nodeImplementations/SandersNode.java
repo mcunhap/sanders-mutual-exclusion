@@ -143,6 +143,7 @@ public class SandersNode extends Node {
 
     public void exitCS() {
         inCs = false;
+        yesVotes = 0;
 
         broadcast(new RelinquishMessage());
     }
