@@ -48,6 +48,7 @@ import sinalgo.nodes.messages.Message;
 import sinalgo.tools.logging.Logging;
 
 import java.awt.*;
+import java.util.ArrayList;
 import java.util.PriorityQueue;
 import java.util.Random;
 
@@ -100,6 +101,14 @@ public class SandersNode extends Node {
 
     @Override
     public void preStep() {
+        PriorityQueue<Requester> PQCopy = new PriorityQueue<Requester>(deferredQ);
+        ArrayList<Long> queueToPrint = new ArrayList<Long>();
+
+        while (!PQCopy.isEmpty()) {
+            queueToPrint.add(PQCopy.poll().node.getID());
+        }
+
+        System.out.println("deferredQ: " + queueToPrint);
         if (!inCs && tryEnterCS()) {
             enterCS();
         }
