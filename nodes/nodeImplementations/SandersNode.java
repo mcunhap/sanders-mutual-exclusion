@@ -116,7 +116,23 @@ public class SandersNode extends Node {
 
     @Override
     public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
-        super.draw(g, pt, highlight);
+        String text;
+        if (inCs) {
+            text = "CS";
+            super.drawNodeAsDiskWithText(g, pt, highlight, text, 20, Color.RED);
+        } else {
+            text = "yV: " + yesVotes;
+            if (hasVoted) {
+                if (inquired) {
+                    text = text + " InqV [" + candidate.getID() + "]";
+                } else {
+                    text = text + " V [" + candidate.getID() + "]";
+                }
+            } else {
+                text = text + " NotV";
+            }
+            super.drawNodeAsSquareWithText(g, pt, highlight, text, 20, Color.WHITE);
+        }
     }
 
     @Override
