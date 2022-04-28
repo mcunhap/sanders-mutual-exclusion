@@ -57,11 +57,12 @@ import java.util.Random;
 public class SandersNode extends Node {
     public static final double CRITICAL_SESSION_TIME = 5.0;
     boolean inCs = false;
+    boolean waitingCS = false;
     boolean hasVoted = false;
     boolean inquired = false;
     int currTs = 0;
     int yesVotes = 0;
-    int myTs;
+    int myTs = 0;
     int candidateTs;
     Node candidate;
     PriorityQueue<Requester> deferredQ;
@@ -94,13 +95,17 @@ public class SandersNode extends Node {
     }
 
     private boolean tryEnterCS() {
+        // if already waiting for CS, not try to enter again... that's right?
+        if (waitingCS) {
+            return false;
+        }
+
         Random random = new Random();
 
-        return random.ints(1, 5).findFirst().getAsInt() == 1;
+        return random.ints(1, 10).findFirst().getAsInt() == 5;
     }
 
-    @Override
-    public void preStep() {
+    private void printDeferredQ() {
         PriorityQueue<Requester> PQCopy = new PriorityQueue<Requester>(deferredQ);
         ArrayList<Long> queueToPrint = new ArrayList<Long>();
 
@@ -109,6 +114,12 @@ public class SandersNode extends Node {
         }
 
         System.out.println("deferredQ: " + queueToPrint);
+    }
+
+    @Override
+    public void preStep() {
+        printDeferredQ();
+
         if (!inCs && tryEnterCS()) {
             enterCS();
         }
@@ -126,9 +137,19 @@ public class SandersNode extends Node {
     @Override
     public void draw(Graphics g, PositionTransformation pt, boolean highlight) {
         String text;
+        Color color;
+
+        if (waitingCS) {
+            color = Color.ORANGE;
+        } else if (inCs) {
+            color = Color.RED;
+        } else {
+            color = Color.GREEN;
+        }
+
         if (inCs) {
             text = "CS";
-            super.drawNodeAsDiskWithText(g, pt, highlight, text, 20, Color.RED);
+            super.drawNodeAsDiskWithText(g, pt, highlight, text, 20, color);
         } else {
             text = "yV: " + yesVotes;
             if (hasVoted) {
@@ -140,13 +161,14 @@ public class SandersNode extends Node {
             } else {
                 text = text + " NotV";
             }
-            super.drawNodeAsSquareWithText(g, pt, highlight, text, 20, Color.WHITE);
+            super.drawNodeAsSquareWithText(g, pt, highlight, text, 20, color);
         }
     }
 
     @Override
     public void postStep() {
         currTs++;
+        System.out.println("currTs: " + currTs);
     }
 
     @Override
@@ -161,6 +183,7 @@ public class SandersNode extends Node {
 
     private void enterCS() {
         System.out.println("Node " + this.getID() + " trying to enter in CS");
+        waitingCS = true;
         myTs = currTs;
 
         broadcast(new RequestMessage(myTs));
@@ -170,10 +193,14 @@ public class SandersNode extends Node {
         inCs = false;
         yesVotes = 0;
 
-        broadcast(new RelinquishMessage());
+        broadcast(new ReleaseMessage());
     }
 
     private void handleYes() {
+        if (!waitingCS) {
+            return;
+        }
+
         // safe to get coterie size this way?
         int neighboursSize = this.getOutgoingConnections().size();
         yesVotes++;
@@ -181,6 +208,7 @@ public class SandersNode extends Node {
         // enter to CS if every neighbour vote yes
         if (yesVotes == neighboursSize) {
             inCs = true;
+            waitingCS = false;
 
             // trigger timer to leave critical session
             CriticalSessionTimer timer = new CriticalSessionTimer(this);
@@ -189,7 +217,7 @@ public class SandersNode extends Node {
     }
 
     private void handleInq(Node sender, InqMessage msg) {
-        if (myTs == msg.timestamp) {
+        if (waitingCS && myTs == msg.timestamp) {
             send(new RelinquishMessage(), sender);
             yesVotes--;
         }
@@ -209,7 +237,7 @@ public class SandersNode extends Node {
             // add sender to deferred queue
             deferredQ.add(new Requester(sender, senderTs));
 
-            if ((senderTs < candidateTs) && !inquired) {
+            if ((senderTs < candidateTs || (senderTs == candidateTs && sender.getID() < candidate.getID())) && !inquired) {
                 // request vote annulment
                 send(new InqMessage(candidateTs), candidate);
                 inquired = true;
@@ -222,6 +250,7 @@ public class SandersNode extends Node {
         deferredQ.add(new Requester(candidate, candidateTs));
 
         // get first requester from deferred queue and use as candidate
+        System.out.println("poll deferred queue");
         Requester requester = deferredQ.poll();
         send(new YesMessage(), requester.node);
         candidate = requester.node;
