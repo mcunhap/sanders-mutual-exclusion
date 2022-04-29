@@ -40,6 +40,8 @@ import lombok.Getter;
 import lombok.Setter;
 import projects.sanders.nodes.messages.*;
 import projects.sanders.nodes.timers.CriticalSessionTimer;
+import sinalgo.configuration.Configuration;
+import sinalgo.exception.CorruptConfigurationEntryException;
 import sinalgo.exception.WrongConfigurationException;
 import sinalgo.gui.transformation.PositionTransformation;
 import sinalgo.nodes.Node;
@@ -102,8 +104,15 @@ public class SandersNode extends Node {
         }
 
         Random random = new Random();
+        double criticalSessionProbability = 0.0;
 
-        return random.ints(1, 10).findFirst().getAsInt() == 5;
+        try {
+            criticalSessionProbability = Configuration.getDoubleParameter("CriticalSessionProbability");
+        } catch (CorruptConfigurationEntryException e) {
+            e.printStackTrace();
+        }
+
+        return random.nextDouble() <= criticalSessionProbability;
     }
 
     private void printDeferredQ() {
