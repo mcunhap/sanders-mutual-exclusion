@@ -95,7 +95,7 @@ public class SandersNode extends Node {
     }
 
     private boolean tryEnterCS() {
-        // if already waiting for CS, not try to enter again... that's right?
+        // if already waiting for CS, not try to enter again...
         if (waitingCS) {
             return false;
         }
@@ -168,7 +168,6 @@ public class SandersNode extends Node {
     @Override
     public void postStep() {
         currTs++;
-        System.out.println("currTs: " + currTs);
     }
 
     @Override
@@ -197,10 +196,6 @@ public class SandersNode extends Node {
     }
 
     private void handleYes() {
-        if (!waitingCS) {
-            return;
-        }
-
         // safe to get coterie size this way?
         int neighboursSize = this.getOutgoingConnections().size();
         yesVotes++;
@@ -250,7 +245,6 @@ public class SandersNode extends Node {
         deferredQ.add(new Requester(candidate, candidateTs));
 
         // get first requester from deferred queue and use as candidate
-        System.out.println("poll deferred queue");
         Requester requester = deferredQ.poll();
         send(new YesMessage(), requester.node);
         candidate = requester.node;
