@@ -60,6 +60,7 @@ public class SandersNode extends Node {
     boolean waitingCS = false;
     boolean hasVoted = false;
     boolean inquired = false;
+    int relinquishCounter = 0;
     int currTs = 0;
     int yesVotes = 0;
     int myTs = 0;
@@ -161,6 +162,7 @@ public class SandersNode extends Node {
             } else {
                 text = text + " NotV";
             }
+            text = text + " Rq: " + relinquishCounter;
             super.drawNodeAsSquareWithText(g, pt, highlight, text, 20, color);
         }
     }
@@ -214,6 +216,7 @@ public class SandersNode extends Node {
     private void handleInq(Node sender, InqMessage msg) {
         if (waitingCS && myTs == msg.timestamp) {
             send(new RelinquishMessage(), sender);
+            relinquishCounter++;
             yesVotes--;
         }
     }
