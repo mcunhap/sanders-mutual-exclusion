@@ -191,28 +191,68 @@ public class SandersNode extends Node {
     public void checkRequirements() throws WrongConfigurationException {
     }
 
+    private void sendYes(Node target) {
+        if (target.getID() == this.getID()) {
+            handleYes();
+        } else {
+            send(new YesMessage(), target);
+        }
+    }
+
+    private void sendRelinquish(Node target) {
+        if (target.getID() == this.getID()) {
+           handleRelinquish();
+        } else {
+            send(new RelinquishMessage(), target);
+        }
+    }
+
+    private void sendInq(Node target, int targetTs) {
+        InqMessage inqMessage = new InqMessage(targetTs);
+
+        if (target.getID() == this.getID()) {
+            handleInq(this, inqMessage);
+        } else {
+            send(inqMessage, candidate);
+        }
+    }
+
     private void enterCS() {
         System.out.println("Node " + this.getID() + " trying to enter in CS");
         waitingCS = true;
         myTs = currTs;
 
-        broadcast(new RequestMessage(myTs));
+        if (!hasVoted) {
+            candidate = this;
+            candidateTs = this.myTs;
+            hasVoted = true;
+
+            // simulate yes message from self
+            handleYes();
+        } else {
+            deferredQ.add(new Requester(this, this.myTs));
+        }
+
+        RequestMessage requestMessage = new RequestMessage(myTs);
+        broadcast(requestMessage);
     }
 
     public void exitCS() {
         inCs = false;
         yesVotes = 0;
+        ReleaseMessage releaseMessage = new ReleaseMessage();
 
-        broadcast(new ReleaseMessage());
+        handleRelease();
+        broadcast(releaseMessage);
     }
 
     private void handleYes() {
         // safe to get coterie size this way?
-        int neighboursSize = this.getOutgoingConnections().size();
+        int coterieSize = this.getOutgoingConnections().size() + 1;
         yesVotes++;
 
         // enter to CS if every neighbour vote yes
-        if (yesVotes == neighboursSize) {
+        if (yesVotes == coterieSize) {
             inCs = true;
             waitingCS = false;
 
@@ -224,7 +264,7 @@ public class SandersNode extends Node {
 
     private void handleInq(Node sender, InqMessage msg) {
         if (waitingCS && myTs == msg.timestamp) {
-            send(new RelinquishMessage(), sender);
+            sendRelinquish(sender);
             relinquishCounter++;
             yesVotes--;
         }
@@ -236,7 +276,7 @@ public class SandersNode extends Node {
 
         if (!hasVoted) {
             // send vote to sender
-            send(new YesMessage(), sender);
+            sendYes(sender);
             candidate = sender;
             candidateTs = senderTs;
             hasVoted = true;
@@ -246,7 +286,7 @@ public class SandersNode extends Node {
 
             if ((senderTs < candidateTs || (senderTs == candidateTs && sender.getID() < candidate.getID())) && !inquired) {
                 // request vote annulment
-                send(new InqMessage(candidateTs), candidate);
+                sendInq(candidate, candidateTs);
                 inquired = true;
             }
         }
@@ -258,7 +298,7 @@ public class SandersNode extends Node {
 
         // get first requester from deferred queue and use as candidate
         Requester requester = deferredQ.poll();
-        send(new YesMessage(), requester.node);
+        sendYes(requester.node);
         candidate = requester.node;
         candidateTs = requester.timestamp;
         inquired = false;
@@ -268,7 +308,7 @@ public class SandersNode extends Node {
         if (!deferredQ.isEmpty()) {
             // get first requester from deferred queue and use as candidate
             Requester nextRequester = deferredQ.poll();
-            send(new YesMessage(), nextRequester.node);
+            sendYes(nextRequester.node);
             candidate = nextRequester.node;
             candidateTs = nextRequester.timestamp;
         } else {
