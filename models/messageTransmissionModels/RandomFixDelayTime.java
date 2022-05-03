@@ -52,11 +52,16 @@ public class RandomFixDelayTime extends sinalgo.models.MessageTransmissionModel 
     @Getter(AccessLevel.PRIVATE)
     @Setter(AccessLevel.PRIVATE)
     private double delayProbability = 0.0;
-    private double withoutDelay = 1.0;
+
+    @Getter(AccessLevel.PRIVATE)
+    @Setter(AccessLevel.PRIVATE)
     private double delay = 3.0;
+
+    private double withoutDelay = 1.0;
 
     public RandomFixDelayTime() throws CorruptConfigurationEntryException {
         this.setDelayProbability(Configuration.getDoubleParameter("RandomFixDelayTransmission/DelayProbability"));
+        this.setDelay(Configuration.getDoubleParameter("RandomFixDelayTransmission/Delay"));
     }
 
     @Override

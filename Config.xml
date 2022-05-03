@@ -228,7 +228,7 @@
 
     </Framework>
     <Custom>
-        <RandomFixDelayTransmission DelayProbability="0.5" />
+        <RandomFixDelayTransmission DelayProbability="0" Delay="3.0" />
         <Node defaultSize="10"/>
         <GeometricNodeCollection rMax="100000"/>
         <CriticalSessionProbability value="0.5"/>
