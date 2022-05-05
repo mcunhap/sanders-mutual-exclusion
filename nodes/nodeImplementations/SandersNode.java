@@ -286,8 +286,8 @@ public class SandersNode extends Node {
 
             if ((senderTs < candidateTs || (senderTs == candidateTs && sender.getID() < candidate.getID())) && !inquired) {
                 // request vote annulment
-                sendInq(candidate, candidateTs);
                 inquired = true;
+                sendInq(candidate, candidateTs);
             }
         }
     }
