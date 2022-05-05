@@ -44,6 +44,7 @@ import lombok.Setter;
  * log-file. The levels below (with a higher enumeration value) not.
  */
 public class LogL extends sinalgo.tools.logging.LogL {
+    public static final boolean debugLog = true;
 
     /**
      * An additional loglevel to inform about loggings for the sending process of

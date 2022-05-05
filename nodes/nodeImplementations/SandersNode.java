@@ -38,6 +38,7 @@ package projects.sanders.nodes.nodeImplementations;
 
 import lombok.Getter;
 import lombok.Setter;
+import projects.sanders.LogL;
 import projects.sanders.nodes.messages.*;
 import projects.sanders.nodes.timers.CriticalSessionTimer;
 import sinalgo.configuration.Configuration;
@@ -70,7 +71,7 @@ public class SandersNode extends Node {
     Node candidate;
     PriorityQueue<Requester> deferredQ;
 
-    Logging myLog = Logging.getLogger("logfile.txt");
+    Logging logger = Logging.getLogger("logfile.txt");
 
     @Override
     public void handleMessages(Inbox inbox) {
@@ -176,7 +177,7 @@ public class SandersNode extends Node {
 
 
     private void enterCS() {
-        System.out.println("Node " + this.getID() + " trying to enter in CS");
+        logger.logln(LogL.debugLog,"Node " + this.getID() + " trying to enter in CS");
         waitingCS = true;
         myTs = currTs;
         RequestMessage requestMessage = new RequestMessage(myTs);
@@ -256,7 +257,7 @@ public class SandersNode extends Node {
     }
 
     private void handleYes(Node sender) {
-        System.out.println("Node " + this.getID() + " received yes message from node " + sender.getID());
+        logger.logln(LogL.debugLog,"Node " + this.getID() + " received yes message from node " + sender.getID());
         // coterieSize = outgoing connections + node itself
         int coterieSize = this.getOutgoingConnections().size() + 1;
         yesVotes++;
@@ -273,7 +274,7 @@ public class SandersNode extends Node {
     }
 
     private void handleInq(Node sender, InqMessage msg) {
-        System.out.println("Node " + this.getID() + " received inq message from node " + sender.getID());
+        logger.logln(LogL.debugLog,"Node " + this.getID() + " received inq message from node " + sender.getID());
 
         if (waitingCS && myTs == msg.timestamp) {
             sendRelinquish(sender);
@@ -284,7 +285,7 @@ public class SandersNode extends Node {
 
 
     private void handleRequest(Node sender, RequestMessage msg) {
-        System.out.println("Node " + this.getID() + " received request message from node " + sender.getID());
+        logger.logln(LogL.debugLog,"Node " + this.getID() + " received request message from node " + sender.getID());
 
         int senderTs = msg.timestamp;
 
@@ -307,7 +308,7 @@ public class SandersNode extends Node {
     }
 
     private void handleRelinquish(Node sender) {
-        System.out.println("Node " + this.getID() + " received relinquish message from node " + sender.getID());
+        logger.logln(LogL.debugLog,"Node " + this.getID() + " received relinquish message from node " + sender.getID());
 
         // add candidate to deferred queue
         deferredQ.add(new Requester(candidate, candidateTs));
@@ -321,7 +322,7 @@ public class SandersNode extends Node {
     }
 
     private void handleRelease(Node sender) {
-        System.out.println("Node " + this.getID() + " received release message from node " + sender.getID());
+        logger.logln(LogL.debugLog,"Node " + this.getID() + " received release message from node " + sender.getID());
 
         if (!deferredQ.isEmpty()) {
             // get first requester from deferred queue and use as candidate
@@ -344,7 +345,7 @@ public class SandersNode extends Node {
             queueToPrint.add(PQCopy.poll().node.getID());
         }
 
-        System.out.println("Node " + this.getID() + " deferredQ: " + queueToPrint);
+        logger.logln(LogL.debugLog,"Node " + this.getID() + " deferredQ: " + queueToPrint);
     }
 
     private boolean targetEqualToSender(Node target, Node sender) {

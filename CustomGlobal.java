@@ -135,7 +135,9 @@ public class CustomGlobal extends AbstractCustomGlobal {
 
     @Override
     public void postRound() {
-      System.out.println("------------ round finished -------------");
+        Logging logger = Logging.getLogger("logfile.txt");
+
+        logger.logln(LogL.debugLog, "------------ round finished -------------");
     }
 
     @Override
