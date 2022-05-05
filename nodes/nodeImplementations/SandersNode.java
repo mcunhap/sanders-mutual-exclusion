@@ -145,6 +145,7 @@ public class SandersNode extends Node {
 
     @Override
     public void postStep() {
+        logger.logln(LogL.debugLog, "Relinquish Counter: " + relinquishCounter);
         currTs++;
     }
 
