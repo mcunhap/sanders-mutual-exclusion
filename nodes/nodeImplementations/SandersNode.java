@@ -79,51 +79,17 @@ public class SandersNode extends Node {
             Node sender = inbox.getSender();
 
             if (msg instanceof YesMessage) {
-                System.out.println("Node " + this.getID() + " received yes message from node " + sender.getID());
-                handleYes();
+                handleYes(sender);
             } else if (msg instanceof InqMessage) {
-                System.out.println("Node " + this.getID() + " received inq message from node " + sender.getID());
                 handleInq(sender, (InqMessage) msg);
             } else if (msg instanceof RequestMessage) {
-                System.out.println("Node " + this.getID() + " received request message from node " + sender.getID());
                 handleRequest(sender, (RequestMessage) msg);
             } else if (msg instanceof RelinquishMessage) {
-                System.out.println("Node " + this.getID() + " received relinquish message from node " + sender.getID());
-                handleRelinquish();
+                handleRelinquish(sender);
             } else if (msg instanceof ReleaseMessage) {
-                System.out.println("Node " + this.getID() + " received release message from node " + sender.getID());
-                handleRelease();
+                handleRelease(sender);
             }
         }
-    }
-
-    private boolean tryEnterCS() {
-        // if already waiting for CS, not try to enter again...
-        if (waitingCS) {
-            return false;
-        }
-
-        Random random = new Random();
-        double criticalSessionProbability = 0.0;
-
-        try {
-            criticalSessionProbability = Configuration.getDoubleParameter("CriticalSessionProbability");
-        } catch (CorruptConfigurationEntryException e) {
-            e.printStackTrace();
-        }
-
-        return random.nextDouble() <= criticalSessionProbability;
-    }
-
-    private void printDeferredQ() {
-        PriorityQueue<Requester> PQCopy = new PriorityQueue<Requester>(deferredQ);
-        ArrayList<Long> queueToPrint = new ArrayList<Long>();
-
-        while (!PQCopy.isEmpty()) {
-            queueToPrint.add(PQCopy.poll().node.getID());
-        }
-
-        System.out.println("deferredQ: " + queueToPrint);
     }
 
     @Override
@@ -137,7 +103,7 @@ public class SandersNode extends Node {
 
     @Override
     public void init() {
-        deferredQ = new PriorityQueue<Requester>(5, new RequesterComparator());
+        deferredQ = new PriorityQueue<>(5, new RequesterComparator());
     }
 
     @Override
@@ -183,25 +149,79 @@ public class SandersNode extends Node {
 
     @Override
     public String toString() {
-        String text = "My timestamp: " + this.myTs + " yesVotes: " + this.yesVotes;
-        return text;
+        return "";
     }
 
     @Override
     public void checkRequirements() throws WrongConfigurationException {
     }
 
+    private boolean tryEnterCS() {
+        // if already waiting for CS, not try to enter again...
+        if (waitingCS) {
+            return false;
+        }
+
+        Random random = new Random();
+        double criticalSessionProbability = 0.0;
+
+        try {
+            criticalSessionProbability = Configuration.getDoubleParameter("CriticalSessionProbability");
+        } catch (CorruptConfigurationEntryException e) {
+            e.printStackTrace();
+        }
+
+        return random.nextDouble() <= criticalSessionProbability;
+    }
+
+
+    private void enterCS() {
+        System.out.println("Node " + this.getID() + " trying to enter in CS");
+        waitingCS = true;
+        myTs = currTs;
+        RequestMessage requestMessage = new RequestMessage(myTs);
+
+        broadcastToCoterie(requestMessage);
+    }
+
+    public void exitCS() {
+        inCs = false;
+        yesVotes = 0;
+        ReleaseMessage releaseMessage = new ReleaseMessage();
+
+        broadcastToCoterie(releaseMessage);
+    }
+
+    private void broadcastToCoterie(Message msg) {
+        if (msg instanceof YesMessage) {
+            sendYes(this);
+            broadcast(msg);
+        } else if (msg instanceof InqMessage) {
+            sendInq(this, ((InqMessage) msg).timestamp);
+            broadcast(msg);
+        } else if (msg instanceof RequestMessage) {
+            sendRequest(this, ((RequestMessage) msg).timestamp);
+            broadcast(msg);
+        } else if (msg instanceof RelinquishMessage) {
+            sendRelinquish(this);
+            broadcast(msg);
+        } else if (msg instanceof ReleaseMessage) {
+            sendRelease(this);
+            broadcast(msg);
+        }
+    }
+
     private void sendYes(Node target) {
-        if (target.getID() == this.getID()) {
-            handleYes();
+        if (targetEqualToSender(target, this)) {
+            handleYes(this);
         } else {
             send(new YesMessage(), target);
         }
     }
 
     private void sendRelinquish(Node target) {
-        if (target.getID() == this.getID()) {
-           handleRelinquish();
+        if (targetEqualToSender(target, this)) {
+            handleRelinquish(target);
         } else {
             send(new RelinquishMessage(), target);
         }
@@ -210,48 +230,38 @@ public class SandersNode extends Node {
     private void sendInq(Node target, int targetTs) {
         InqMessage inqMessage = new InqMessage(targetTs);
 
-        if (target.getID() == this.getID()) {
+        if (targetEqualToSender(target, this)) {
             handleInq(this, inqMessage);
         } else {
-            send(inqMessage, candidate);
+            send(inqMessage, target);
         }
     }
 
-    private void enterCS() {
-        System.out.println("Node " + this.getID() + " trying to enter in CS");
-        waitingCS = true;
-        myTs = currTs;
+    private void sendRequest(Node target, int targetTs) {
+        RequestMessage requestMessage = new RequestMessage(targetTs);
 
-        if (!hasVoted) {
-            candidate = this;
-            candidateTs = this.myTs;
-            hasVoted = true;
-
-            // simulate yes message from self
-            handleYes();
+        if (targetEqualToSender(target, this)) {
+            handleRequest(this, requestMessage);
         } else {
-            deferredQ.add(new Requester(this, this.myTs));
+            send(requestMessage, target);
         }
-
-        RequestMessage requestMessage = new RequestMessage(myTs);
-        broadcast(requestMessage);
     }
 
-    public void exitCS() {
-        inCs = false;
-        yesVotes = 0;
-        ReleaseMessage releaseMessage = new ReleaseMessage();
-
-        handleRelease();
-        broadcast(releaseMessage);
+    private void sendRelease(Node target) {
+        if (targetEqualToSender(target, this)) {
+            handleRelease(target);
+        } else {
+            send(new ReleaseMessage(), target);
+        }
     }
 
-    private void handleYes() {
-        // safe to get coterie size this way?
+    private void handleYes(Node sender) {
+        System.out.println("Node " + this.getID() + " received yes message from node " + sender.getID());
+        // coterieSize = outgoing connections + node itself
         int coterieSize = this.getOutgoingConnections().size() + 1;
         yesVotes++;
 
-        // enter to CS if every neighbour vote yes
+        // enter to CS if every node from coterie vote yes
         if (yesVotes == coterieSize) {
             inCs = true;
             waitingCS = false;
@@ -263,6 +273,8 @@ public class SandersNode extends Node {
     }
 
     private void handleInq(Node sender, InqMessage msg) {
+        System.out.println("Node " + this.getID() + " received inq message from node " + sender.getID());
+
         if (waitingCS && myTs == msg.timestamp) {
             sendRelinquish(sender);
             relinquishCounter++;
@@ -272,6 +284,8 @@ public class SandersNode extends Node {
 
 
     private void handleRequest(Node sender, RequestMessage msg) {
+        System.out.println("Node " + this.getID() + " received request message from node " + sender.getID());
+
         int senderTs = msg.timestamp;
 
         if (!hasVoted) {
@@ -292,7 +306,9 @@ public class SandersNode extends Node {
         }
     }
 
-    private void handleRelinquish() {
+    private void handleRelinquish(Node sender) {
+        System.out.println("Node " + this.getID() + " received relinquish message from node " + sender.getID());
+
         // add candidate to deferred queue
         deferredQ.add(new Requester(candidate, candidateTs));
 
@@ -304,7 +320,9 @@ public class SandersNode extends Node {
         inquired = false;
     }
 
-    private void handleRelease() {
+    private void handleRelease(Node sender) {
+        System.out.println("Node " + this.getID() + " received release message from node " + sender.getID());
+
         if (!deferredQ.isEmpty()) {
             // get first requester from deferred queue and use as candidate
             Requester nextRequester = deferredQ.poll();
@@ -316,5 +334,20 @@ public class SandersNode extends Node {
         }
 
         inquired = false;
+    }
+
+    private void printDeferredQ() {
+        PriorityQueue<Requester> PQCopy = new PriorityQueue<>(deferredQ);
+        ArrayList<Long> queueToPrint = new ArrayList<>();
+
+        while (!PQCopy.isEmpty()) {
+            queueToPrint.add(PQCopy.poll().node.getID());
+        }
+
+        System.out.println("Node " + this.getID() + " deferredQ: " + queueToPrint);
+    }
+
+    private boolean targetEqualToSender(Node target, Node sender) {
+        return target.getID() == sender.getID();
     }
 }
