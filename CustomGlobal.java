@@ -39,20 +39,14 @@ package projects.sanders;
 import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
-import projects.sanders.nodes.nodeImplementations.SandersNode;
 import sinalgo.configuration.Configuration;
 import sinalgo.exception.CorruptConfigurationEntryException;
 import sinalgo.exception.SinalgoFatalException;
-import sinalgo.runtime.AbstractCustomGlobal;
-import sinalgo.runtime.GUIRuntime;
-import sinalgo.runtime.Global;
-import sinalgo.runtime.Main;
+import sinalgo.runtime.*;
 import sinalgo.tools.Tools;
 import sinalgo.tools.logging.Logging;
 
 import javax.swing.*;
-import java.lang.reflect.Method;
-import java.util.Enumeration;
 
 /**
  * This class holds customized global state and methods for the framework. The
@@ -73,11 +67,12 @@ import java.util.Enumeration;
  * framework with custom methods that can be called either through the menu
  * or via a button that is added to the GUI.
  */
+
 @Getter(AccessLevel.PRIVATE)
 @Setter(AccessLevel.PRIVATE)
 public class CustomGlobal extends AbstractCustomGlobal {
 
-    private Logging log = Logging.getLogger("sanders_log.txt");
+    private Logging logger = Logging.getLogger("logfile.txt");
 
     // The user can optionally specify exitAfter in the config file to indicate
     // after how many rounds the simulation should stop.
@@ -135,8 +130,6 @@ public class CustomGlobal extends AbstractCustomGlobal {
 
     @Override
     public void postRound() {
-        Logging logger = Logging.getLogger("logfile.txt");
-
         logger.logln(LogL.debugLog, "------------ round finished -------------");
     }
 
