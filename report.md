@@ -143,7 +143,7 @@ The node text tell us how many yes votes `[yV]` this node receive, if this node 
 The shape tell us if the node is in critical session or not (circle when it is in critical session and square if not).  
 The colors tells us the node state, that can be in critical session (red), waiting for critical session (yellow) and not trying to enter in critical session (green).
 
-![Display example.](./sanders-image.png)
+![Display example.](./images/sanders-image.png)
 
 ### Configuration
 
